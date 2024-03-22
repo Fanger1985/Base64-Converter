@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>CodePen - TheFanger Base64 Converter 3.0</title>
+  
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>TheFanger Base64 Universal Converter - Ultimate Edition</title>
+  <style>
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: url('https://thefanger.com/asspaper/mood2.png') no-repeat center center fixed; 
+  background-size: cover;
+  font-family: 'Arial', sans-serif;
+  color: white;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+    .container {
+      backdrop-filter: blur(10px);
+      background: rgba(0, 0, 0, 0.7);
+      border-radius: 10px;
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+      margin: auto;
+  padding: 20px;
+  height: auto; /* changed from 80% to auto */
+  max-height: 80%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around; /* changed to space-around for even spacing */
+}
+
+    #output, #preview {
+      width: 100%;
+      height: 30%;
+      padding: 12px;
+      margin-top: 20px;
+      background-color: rgba(255, 255, 255, 0.2);
+      border: none;
+      border-radius: 5px;
+      resize: none;
+      overflow: auto;
+      box-sizing: border-box;
+    }
+    button {
+      padding: 10px 20px;
+      background: #555;
+      border: none;
+      border-radius: 5px;
+      margin: 10px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #777;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Base64 Universal Encoder - The Ultimate Edition</h1>
+    <input type="file" id="fileInput" />
+    <button onclick="clearBox()">Clear</button>
+    <textarea id="output"></textarea>
+    <button onclick="copyToClipboard()">Copy</button>
+    <label><input type="checkbox" id="addMIME" checked> Add data:MIME;base64 prefix</label>
+    <button onclick="exportToJS()">Export to .js</button>
+    <div id="preview"></div> <!-- Added preview container -->
+  </div>
+
+  <script>
+    const myBase64Data = {};
+
+    document.getElementById('fileInput').addEventListener('change', function() {
+      const file = this.files[0];
+      if (!file) {
+        alert("Whoops! Looks like you didn't pick a file. Give it another go, yeah?");
+        return;
+      }
+
+      if (file.size > 10485760) { // 10MB limit
+        alert("Hold up! This file's too chunky. Keep it under 10MB, will ya?");
+        return;
+      }
+
+      const allowedTypes = ['image/jpeg', 'image/png', 'audio/mpeg', 'audio/mp3'];
+      if (!allowedTypes.includes(file.type)) {
+        alert("Ah, we can't work with this file type. Stick to JPG, PNG, or MP3, buddy.");
+        return;
+      }
+
+      const reader = new FileReader();
+      
+      reader.onprogress = function(event) {
+        if (event.lengthComputable) {
+          let percentLoaded = Math.round((event.loaded / event.total) * 100);
+          console.log(percentLoaded + '% loaded');
+        }
+      };
+      
+      reader.onloadstart = () => console.log("Kicking off the reading magic...");
+      reader.onerror = () => alert("Uh oh, something's not right. Wanna try again?");
+
+      reader.readAsDataURL(file);
+      reader.onloadend = function() {
+        let base64 = reader.result;
+        const fileName = file.name.split('.')[0];
+
+        if (document.getElementById("addMIME").checked) {
+          myBase64Data[fileName] = base64;
+        } else {
+          myBase64Data[fileName] = base64.split(',')[1];
+        }
+
+        document.getElementById('output').value = base64;
+
+        const previewContainer = document.getElementById('preview');
+        previewContainer.innerHTML = '';
+
+        if (file.type.startsWith('image/')) {
+          let img = document.createElement('img');
+          img.src = base64;
+          img.style.maxWidth = '200px'; // Keeping the preview image small
+          img.style.borderRadius = '5px'; // Adding a little style
+          previewContainer.appendChild(img);
+        } else if (file.type.startsWith('audio/')) {
+          let audio = document.createElement('audio');
+          audio.src = base64;
+          audio.controls = true;
+          previewContainer.appendChild(audio);
+        }
+      };
+    });
+
+    function exportToJS() {
+      const jsContent = `const myBase64Data = ${JSON.stringify(myBase64Data, null, 2)};`;
+      const blob = new Blob([jsContent], {type: 'application/javascript'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = 'myBase64Data.js';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+    }
+
+    function copyToClipboard() {
+      const copyText = document.getElementById('output');
+      copyText.select();
+      document.execCommand('copy');
+      alert('Base64 copied to clipboard. You\'re a total rockstar! 🎉');
+    }
+
+    function clearBox() {
+      document.getElementById('output').value = "";
+      document.getElementById('fileInput').value = "";
+      const previewContainer = document.getElementById('preview');
+      previewContainer.innerHTML = ''; // Clearing the preview as well
+    }
+  </script>
+</body>
+</html>
+<!-- partial -->
+  
+</body>
+</html>
